@@ -18,60 +18,63 @@
 	angular.module("app",[])
 	.controller("whxyDemoCtrl",["$scope","$timeout",function($scope,$timeout){
 		/*
-		«İ¿ì
-			debug¼Ò¦¡
-		¤å¦r°Ñ¼Æ
+		å¾…è¾¦
+			debugæ¨¡å¼
+			æ•´ç†ç­‰å¾…è‡ªè¡Œè¼‰å…¥ç¨‹å¼
+			æ‹†functionæˆæª”æ¡ˆ
+			
+		æ–‡å­—åƒæ•¸
 		var font_object={
-			text:"test123 go go",//¦X¦¨¤å¦r
-			w:100,//°Ï¶ô¤j¤p
-			h:100,//°Ï¶ô¤j¤p
-			size:100,//¤j¤p ¤p©óµ¥©ó20µLªk¦X¹Ï
-			color:"#FFFFFF",//ÃC¦â
-			type:0,//0:¦h¦æ¦Û°ÊÁY¤p,1:¤ô¥­³æ¦æ,2««ª½³æ¦æ
-			family:'·L³n¥¿¶ÂÅé',//¦rÅé
-			bg_size:5,//0-10´yÃä²Ê«×
-			bg_color:"#000000",//´yÃäÃC¦â
+			text:"test123 go go",//åˆæˆæ–‡å­—
+			w:100,//å€å¡Šå¤§å°
+			h:100,//å€å¡Šå¤§å°
+			size:100,//å¤§å° å°æ–¼ç­‰æ–¼20ç„¡æ³•åˆåœ–
+			color:"#FFFFFF",//é¡è‰²
+			type:0,//0:å¤šè¡Œè‡ªå‹•ç¸®å°,1:æ°´å¹³å–®è¡Œ,2å‚ç›´å–®è¡Œ
+			family:'å¾®è»Ÿæ­£é»‘é«”',//å­—é«”
+			bg_size:5,//0-10æé‚Šç²—åº¦
+			bg_color:"#000000",//æé‚Šé¡è‰²
 			align:{
-				h:0,//¤ô¥­¹ï»ô
-				v:0,//««ª½¹ï»ô
+				h:0,//æ°´å¹³å°é½Š
+				v:0,//å‚ç›´å°é½Š
 			},
-			continuous_word:[],//³sÄò¦r¶°¦X¤£´«¦ætext:¤å¦r es
+			continuous_word:[],//é€£çºŒå­—é›†åˆä¸æ›è¡Œtext:æ–‡å­— es
 		}
 		
 		canvas merge_text(font_object)
-			¤å¦r¦X¦¨¹Ï¤ù
-			font_object ¤å¦r¦X¦¨°Ñ¼Æ
+			æ–‡å­—åˆæˆåœ–ç‰‡
+			font_object æ–‡å­—åˆæˆåƒæ•¸
 			
 		canvas get_text_img(font_object,text)  
-			¦X¦¨¤å¦r¹Ï
-			font_object ¤å¦r¦X¦¨°Ñ¼Æ
-			text ¦X¦¨³æ¦r
+			åˆæˆæ–‡å­—åœ–
+			font_object æ–‡å­—åˆæˆåƒæ•¸
+			text åˆæˆå–®å­—
 			
 		resize_text_imgs(&text_imgs,int scale)	
-			ÁY©ñ¤å¦r¹Ï
-			text_imgs ¤å¦r¹Ï°}¦C
-			scale ÁY©ñ¤j¤p 
+			ç¸®æ”¾æ–‡å­—åœ–
+			text_imgs æ–‡å­—åœ–é™£åˆ—
+			scale ç¸®æ”¾å¤§å° 
 			
 		int count_scale(text_imgs,w,h)
-			­pºâ³Ì±µªñªºÁY©ñ¤ñ¨Ò
-			text_imgs ¤å¦r¹Ï°}¦C
-			w ¼e
-			h °ª
+			è¨ˆç®—æœ€æ¥è¿‘çš„ç¸®æ”¾æ¯”ä¾‹
+			text_imgs æ–‡å­—åœ–é™£åˆ—
+			w å¯¬
+			h é«˜
 			
 		merge_one_line(text_imgs)
-			¦h­Ó¤å¦r¹Ï¦X¦¨¤@±i¹Ï
-			text_imgs ¤å¦r¹Ï°}¦C
+			å¤šå€‹æ–‡å­—åœ–åˆæˆä¸€å¼µåœ–
+			text_imgs æ–‡å­—åœ–é™£åˆ—
 			
 		merge_line_text(text_imgs,continuous_word)
-			«O¯d¤å¦r¹Ï¦X¦¨¤@±i¹Ï
-			text_imgs ¤å¦r¹Ï°}¦C
-			continuous_word «O¯d¦r
+			ä¿ç•™æ–‡å­—åœ–åˆæˆä¸€å¼µåœ–
+			text_imgs æ–‡å­—åœ–é™£åˆ—
+			continuous_word ä¿ç•™å­—
 			
 		int count_break_scale(text_imgs,w,h,w_func,h_func)
-			­pºâ««ª½ ¤ô¥­ ³æ¦æÁY©ñ¤j¤p
+			è¨ˆç®—å‚ç›´ æ°´å¹³ å–®è¡Œç¸®æ”¾å¤§å°
 		
 		int align_count(align,amount,inner_amount)
-			­pºâ««ª½¤ô¥­¦ì¸m
+			è¨ˆç®—å‚ç›´æ°´å¹³ä½ç½®
 		*/
 		function get_text_img(object,text){
 			var w=object.size*1
@@ -82,9 +85,9 @@
 			
 			if(bg_size>10)bg_size=10;
 			
-			var check_resize=text.match(new RegExp("[a-zA-Z¢é-£C¢Ï-¢è]"));
+			var check_resize=text.match(new RegExp("[a-zA-Zï½-ï½šï¼¡-ï¼º]"));
 			if(check_resize){
-				size*=.77;//­^¤å¦r»İ­nÁY¤p¤£µMjqQ·|¶W¹LÃä¬É
+				size*=.77;//è‹±æ–‡å­—éœ€è¦ç¸®å°ä¸ç„¶jqQæœƒè¶…éé‚Šç•Œ
 			}
 			
 			bg_size*=(size/100)
@@ -94,7 +97,7 @@
 			var y=h/2;
 			if(bg_size){
 				x+=bg_size/2;
-				if(["j","¢ò"].indexOf(text)!=-1){
+				if(["j","ï½Š"].indexOf(text)!=-1){
 					x+=bg_size;
 				}
 			}
@@ -165,7 +168,7 @@
 				// size*=scale;
 				for(var i in text_imgs){
 					var img=text_imgs[i];
-					if(img.width>w){//³æ­Ó¼e¶W¹L
+					if(img.width>w){//å–®å€‹å¯¬è¶…é
 						return false;
 					}
 					if((x+img.width)>w){
@@ -174,13 +177,13 @@
 					}
 					x+=img.width;
 				}
-				return ((y+img.height) <= h);//¥ş³¡¥[Á`ªº°ª
+				return ((y+img.height) <= h);//å…¨éƒ¨åŠ ç¸½çš„é«˜
 			}
 			
 			var area=w*h;
 			var real_area=text_imgs.reduce(function(sum,c){return sum+c.width*c.height},1)
-			var scale=Math.sqrt(area/real_area);//¦ôºâÁY©ñ
-			if(scale>1){//©ñ¤j¤£°Ê§@
+			var scale=Math.sqrt(area/real_area);//ä¼°ç®—ç¸®æ”¾
+			if(scale>1){//æ”¾å¤§ä¸å‹•ä½œ
 				scale=1;
 			}
 			var count=0;
@@ -196,11 +199,11 @@
 					max_scale=scale;
 				}
 				if(count++>100){
-					console.log("­pºâ¤Ó¦h¦¸break")
+					console.log("è¨ˆç®—å¤ªå¤šæ¬¡break")
 					break;
 				}
 			}
-			if(mix_scale>1){//©ñ¤j¤£°Ê§@
+			if(mix_scale>1){//æ”¾å¤§ä¸å‹•ä½œ
 				mix_scale=1;
 			}
 			return mix_scale;
@@ -265,7 +268,7 @@
 									end:range[i].start+range[i].count,
 								}
 								
-								if(ed.start>main.start && ed.end<main.end){//½d³ò¤ºª½±µ©¿²¤
+								if(ed.start>main.start && ed.end<main.end){//ç¯„åœå…§ç›´æ¥å¿½ç•¥
 									return false;
 								}
 								// console.log("main",main)
@@ -354,14 +357,14 @@
 			var type=font_object.type;
 			var text_arr=text.split("");
 			var text_imgs=[];
-			while(text_arr.length){//¦X¦¨³æ­Ó¤å¦r¹Ï
+			while(text_arr.length){//åˆæˆå–®å€‹æ–‡å­—åœ–
 				text_imgs.push(get_text_img(font_object,text_arr.shift()));
 			}
 			
 			if(type==0){					
 				var w=font_object.w;
 				var h=font_object.h;
-				//³sÄò¦r¦X¦¨¤å¦r¹Ï
+				//é€£çºŒå­—åˆæˆæ–‡å­—åœ–
 				merge_line_text(text_imgs,font_object.continuous_word);			
 				resize_text_imgs(text_imgs,count_scale(text_imgs,w,h));
 				var x=0;
@@ -371,7 +374,7 @@
 				for(var i in text_imgs){
 					var img=text_imgs[i];
 					
-					if((x+img.width)>w){//¶W¹L´N´«¦æ
+					if((x+img.width)>w){//è¶…éå°±æ›è¡Œ
 						while(1){
 							if(merge_tmp.map(function(val){return val.text}).join("").indexOf(" ")==0){
 								merge_tmp.shift();
@@ -466,13 +469,13 @@
 			h:300,
 			size:100,
 			bg_size:10,
-			text:"jjhow are youuu §Ú§Ú§Ú§Ú§Ú§Ú§Ú§Ú§Ú ·F§A¦Ñ®v §Ú§Ú§Ú",
+			text:"jjhow are youuu æˆ‘æˆ‘æˆ‘æˆ‘æˆ‘æˆ‘æˆ‘æˆ‘æˆ‘ å¹¹ä½ è€å¸« æˆ‘æˆ‘æˆ‘",
 			type:0,
 			align:{h:0,v:0},
-			family:"·L³n¥¿¶ÂÅé",
+			family:"å¾®è»Ÿæ­£é»‘é«”",
 			continuous_word:[
 				{text:"how are you",escape:true},
-				{text:"·F§A¦Ñ®v",escape:true},
+				{text:"å¹¹ä½ è€å¸«",escape:true},
 				{text:"[a-zA-z]+",escape:false},
 			],
 		}
