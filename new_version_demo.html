@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<meta charset="utf-8" />
+	<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.2/angular.min.js" ></script>
+	
+	<script>
+	function Canvas(w,h){
+		var canvas=document.createElement('canvas');
+		canvas.width=w;
+		canvas.height=h;
+		return canvas;
+	}
+	</script>
+	<script>
+	angular.module("app",[])
+	.controller("whxyDemoCtrl",["$scope","$timeout",function($scope,$timeout){
+		/*
+		待辦
+			debug模式
+		文字參數
+		var font_object={
+			text:"test123 go go",//合成文字
+			w:100,//區塊大小
+			h:100,//區塊大小
+			size:100,//大小 小於等於20無法合圖
+			color:"#FFFFFF",//顏色
+			type:0,//0:多行自動縮小,1:水平單行,2垂直單行
+			family:'微軟正黑體',//字體
+			bg_size:5,//0-10描邊粗度
+			bg_color:"#000000",//描邊顏色
+			align:{
+				h:0,//水平對齊
+				v:0,//垂直對齊
+			},
+			continuous_word:[],//連續字集合不換行text:文字 es
+		}
+		
+		canvas merge_text(font_object)
+			文字合成圖片
+			font_object 文字合成參數
+			
+		canvas get_text_img(font_object,text)  
+			合成文字圖
+			font_object 文字合成參數
+			text 合成單字
+			
+		resize_text_imgs(&text_imgs,int scale)	
+			縮放文字圖
+			text_imgs 文字圖陣列
+			scale 縮放大小 
+			
+		int count_scale(text_imgs,w,h)
+			計算最接近的縮放比例
+			text_imgs 文字圖陣列
+			w 寬
+			h 高
+			
+		merge_one_line(text_imgs)
+			多個文字圖合成一張圖
+			text_imgs 文字圖陣列
+			
+		merge_line_text(text_imgs,continuous_word)
+			保留文字圖合成一張圖
+			text_imgs 文字圖陣列
+			continuous_word 保留字
+			
+		int count_break_scale(text_imgs,w,h,w_func,h_func)
+			計算垂直 水平 單行縮放大小
+		
+		int align_count(align,amount,inner_amount)
+			計算垂直水平位置
+		*/
+		function get_text_img(object,text){
+			var w=object.size*1
+			var h=object.size*1
+			var size=object.size*1
+			var bg_size=object.bg_size;
+			var family=object.family || "arial";
+			
+			if(bg_size>10)bg_size=10;
+			
+			var check_resize=text.match(new RegExp("[a-zA-Zａ-ｚＡ-Ｚ]"));
+			if(check_resize){
+				size*=.77;//英文字需要縮小不然jqQ會超過邊界
+			}
+			
+			bg_size*=(size/100)
+			
+			var c=(new Canvas(w,h)).getContext("2d");
+			var x=0;
+			var y=h/2;
+			if(bg_size){
+				x+=bg_size/2;
+				if(["j","ｊ"].indexOf(text)!=-1){
+					x+=bg_size;
+				}
+			}
+			var real_size=size
+			if(bg_size){
+				real_size-=bg_size;
+			}
+			
+			while(1){
+				c.fillStyle=object.color;
+				c.font=real_size+"px '"+family+"' "; 
+				c.textBaseline="middle";
+				if(bg_size){
+					c.lineWidth=bg_size;
+					c.strokeStyle=object.bg_color;	
+					c.strokeText(text,x,y);	
+				}
+				c.fillText(text,x,y);
+				var real_w=Math.ceil(c.measureText(text).width)
+				if(bg_size){
+					real_w+=x*2
+				}
+				
+				var w=c.canvas.width
+				if(w>real_w){
+					c.canvas.width=real_w;
+				}else{
+					c.canvas.text=text;
+					return c.canvas;
+				}
+			}
+		}
+		
+		function resize_text_imgs(text_imgs,scale){
+			if(scale!=1)
+			for(var i in text_imgs){
+				var img=text_imgs[i];
+				
+				var w=Math.floor(img.width*scale)
+				var h=Math.floor(img.height*scale);
+				var c=(new Canvas(w,h)).getContext("2d");
+				
+				c.drawImage(img,0,0,w,h);
+				c.canvas.text=img.text
+				text_imgs[i]=c.canvas;
+			}
+		}
+		function count_break_scale(text_imgs,w,h,w_func,h_func){
+			var scale=1;
+			var tmp={};
+			tmp.w=text_imgs.reduce(w_func,0)
+			tmp.h=text_imgs.reduce(h_func,0)
+			if(tmp.w>w){
+				scale*=w/tmp.w;
+			}
+			if(tmp.h>h){
+				scale*=h/tmp.h;
+			}
+			return scale;
+		}
+		function count_scale(text_imgs,w,h){
+			var count_scale_inner=function(text_imgs,w,h,scale){
+				var x=0;
+				var y=0;
+				var text_imgs=angular.copy(text_imgs);
+				resize_text_imgs(text_imgs,scale);
+				// text_imgs
+				// size*=scale;
+				for(var i in text_imgs){
+					var img=text_imgs[i];
+					if(img.width>w){//單個寬超過
+						return false;
+					}
+					if((x+img.width)>w){
+						x=0;
+						y+=img.height;
+					}
+					x+=img.width;
+				}
+				return ((y+img.height) <= h);//全部加總的高
+			}
+			
+			var area=w*h;
+			var real_area=text_imgs.reduce(function(sum,c){return sum+c.width*c.height},1)
+			var scale=Math.sqrt(area/real_area);//估算縮放
+			if(scale>1){//放大不動作
+				scale=1;
+			}
+			var count=0;
+			var mix_scale=0;
+			var max_scale=scale;
+			
+			while(Math.floor((max_scale-mix_scale)*100)){
+				var scale=(max_scale+mix_scale)/2
+				var result=count_scale_inner(text_imgs,w,h,scale);
+				if(result){
+					mix_scale=scale;
+				}else{
+					max_scale=scale;
+				}
+				if(count++>100){
+					console.log("計算太多次break")
+					break;
+				}
+			}
+			if(mix_scale>1){//放大不動作
+				mix_scale=1;
+			}
+			return mix_scale;
+		}
+		
+		function merge_one_line(text_imgs){
+			if(text_imgs.length){
+				var merge_tmp_w=text_imgs.reduce(function(sum,c){return sum+c.width},0)
+				var	merge_tmp_h=text_imgs[0].height;
+				
+				var c=(new Canvas(merge_tmp_w,merge_tmp_h)).getContext("2d");
+				var x=0;
+				var y=0;
+				
+				for(var i in text_imgs){
+					var img=text_imgs[i]
+					c.drawImage(img,x,y);
+					x+=img.width;
+				}
+				
+				c.canvas.text=text_imgs.map(function(val){return val.text}).join("")
+				text_imgs.length=0;
+				return c.canvas;
+			}else{
+				return false;
+			}
+		}
+		function escapeRegExp(string){
+			return ;
+		}
+		function merge_line_text(text_imgs,continuous_word){
+			var texts_array=text_imgs.map(function(val){return val.text});//.join("")
+			var range=[];
+			for(var i in continuous_word){
+				var texts_string=texts_array.join("");
+				var text=continuous_word[i].text
+				var escape=continuous_word[i].escape
+				if(escape){
+					text=text.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1")
+				}
+				var match_result=texts_string.match(new RegExp(text,"g"));
+				
+				if(match_result){
+					// console.log(text,match_result)
+					var count_start=0;
+					
+					match_result.map(function(val,key){
+						
+						var start=texts_string.indexOf(val)
+						var count=val.length;
+						var real_start=start+count_start;
+						function set_fix_range(range,start,count){
+							
+							var ed={
+								start:start,
+								end:start+count,
+							}
+							// console.log("ed",ed)
+							for(var i in range){
+								var main={
+									start:range[i].start,
+									end:range[i].start+range[i].count,
+								}
+								
+								if(ed.start>main.start && ed.end<main.end){//範圍內直接忽略
+									return false;
+								}
+								// console.log("main",main)
+								if(main.start > ed.start){
+									var a=ed;
+									var b=main;
+								}else{
+									var a=main;
+									var b=ed;
+								}
+								if(a.end>b.start){
+									if(angular.equals(ed,a)){
+										ed.end=main.start
+										// console.log("------fix end------")
+									}else{
+										ed.start=main.end
+										// console.log("------fix start------")
+									}
+								}
+							}
+							// console.log("------ok------",ed)
+							if((ed.end-ed.start)>0){
+								return {start:ed.start,count:ed.end-ed.start};
+							}else{
+								return false;
+							}
+						}
+						
+						var fix_range=set_fix_range(range,real_start,count);
+						if(fix_range){
+							range.push(fix_range);
+						}else{
+							return;
+						}
+						
+						clear_start=start+count-1
+						texts_string=texts_string.substr(clear_start);
+						count_start+=clear_start;
+					})
+					// break;
+				}
+				
+			}
+			
+			if(!range.length)return false;
+			range.sort(function(a,b){ return a.start-b.start})
+			var count_start=0;
+			for(var i in range){
+				var start=range[i].start;
+				var count=range[i].count;
+				var texts_string=texts_array.join("").substr(start,count)
+				if((start-count_start)<0)continue;
+				start-=count_start
+				
+				var tmp=text_imgs.splice(start,count)
+				text_imgs.splice(start,0,merge_one_line(tmp));
+				count_start+=count-1;
+			}
+			// console.log(text_imgs.map(function(val){return val.text}));
+			return true;
+		}
+		function align_count(align,amount,inner_amount){
+			var result=0;
+			switch(align){
+				case 1:
+					result=amount/2-inner_amount/2;
+					break;
+				case 2:
+					result=amount-inner_amount;
+					break;
+			}
+			return result;
+		}	
+		function merge_text(font_object){
+			if(font_object.size>font_object.w){
+				font_object.size=font_object.w
+			}
+			if(font_object.size>font_object.h){
+				font_object.size=font_object.h
+			}
+			if(font_object.size<=20){
+				var c=(new Canvas(font_object.w,font_object.h)).getContext("2d");
+				return c.canvas;
+			}
+			var text=font_object.text;
+			var type=font_object.type;
+			var text_arr=text.split("");
+			var text_imgs=[];
+			while(text_arr.length){//合成單個文字圖
+				text_imgs.push(get_text_img(font_object,text_arr.shift()));
+			}
+			
+			if(type==0){					
+				var w=font_object.w;
+				var h=font_object.h;
+				//連續字合成文字圖
+				merge_line_text(text_imgs,font_object.continuous_word);			
+				resize_text_imgs(text_imgs,count_scale(text_imgs,w,h));
+				var x=0;
+				
+				var merge_tmp=[];
+				var result=[];
+				for(var i in text_imgs){
+					var img=text_imgs[i];
+					
+					if((x+img.width)>w){//超過就換行
+						while(1){
+							if(merge_tmp.map(function(val){return val.text}).join("").indexOf(" ")==0){
+								merge_tmp.shift();
+							}else{
+								break;
+							}
+						}
+						
+						var tmp=merge_one_line(merge_tmp);
+						if(tmp){
+							result.push(tmp);
+						}
+						x=0;
+					}
+					merge_tmp.push(img)
+					x+=img.width;
+				}
+				if(merge_tmp.length){
+					var tmp=merge_one_line(merge_tmp);
+					if(tmp){
+						result.push(tmp);
+					}
+				}
+				var text_imgs=result;
+								
+				var c=(new Canvas(w,h)).getContext("2d");
+				var x=0;
+				var y=0;
+				for(var i in text_imgs){
+					var img=text_imgs[i];
+					var img_w=img.width;
+					var img_h=img.height;
+					var x=align_count(font_object.align.h,w,img_w);
+					c.drawImage(img,x,y);
+					y+=img_h;
+				}
+				return c.canvas;
+			}else if(type==1){
+				var w=font_object.w;
+				var h=font_object.h;
+				
+				var w_func=function(sum,c){
+					return sum+c.width;
+				}
+				var h_func=function(max,c){
+					var h=c.height;
+					if(h>max){
+						return h;
+					}else{
+						return max;
+					}
+				}	
+				resize_text_imgs(text_imgs,count_break_scale(text_imgs,w,h,w_func,h_func));
+				var c=(new Canvas(w,h)).getContext("2d");
+				var result_c=merge_one_line(text_imgs);
+				var x=align_count(font_object.align.h,w,result_c.width);
+				var y=align_count(font_object.align.v,h,result_c.height);
+				c.drawImage(result_c,x,y);
+				return c.canvas;
+			}else if(type==2){
+				var w=font_object.w;
+				var h=font_object.h;
+				
+				var w_func=function(max,c){
+					var w=c.width;
+					if(w>max){
+						return w;
+					}else{
+						return max;
+					}
+				}
+				var h_func=function(val,c){
+					return val+c.height;
+				}
+				resize_text_imgs(text_imgs,count_break_scale(text_imgs,w,h,w_func,h_func));
+				var c=(new Canvas(w,h)).getContext("2d");
+				var y=0;
+				for(var i in text_imgs){
+					var img=text_imgs[i];
+					var x=align_count(font_object.align.h,w,img.width);
+					c.drawImage(img,x,y);
+					y+=img.height
+				}
+				return c.canvas;
+			}
+			
+		}
+		$scope.font_object={
+			color:"#fff000",
+			bg_color:"#000000",
+			w:300,
+			h:300,
+			size:100,
+			bg_size:10,
+			text:"jjhow are youuu 我我我我我我我我我 幹你老師 我我我",
+			type:0,
+			align:{h:0,v:0},
+			family:"微軟正黑體",
+			continuous_word:[
+				{text:"how are you",escape:true},
+				{text:"幹你老師",escape:true},
+				{text:"[a-zA-z]+",escape:false},
+			],
+		}
+		var timer;
+		$scope.$watch("font_object",function(val){
+			$timeout.cancel(timer);
+			timer=$timeout(function(){
+				// var start_time=Date.now();
+				var c=merge_text(val);
+				// var c=get_text_img(val,val.text[0]);
+				$scope.img=c.toDataURL("image/png");
+				$scope.w=c.width;
+				$scope.h=c.height;
+				// console.log((Date.now()/start_time)/1000)
+			},50)
+		},1)
+	}])
+	</script>
+</head>
+<body 
+ng-app="app"
+ng-controller="whxyDemoCtrl"
+style="overflow-y: scroll;"
+>
+
+	<textarea 
+	style="
+	width:500px;
+	height:100px;
+	"
+	ng-model="font_object.text"></textarea>{{font_object.text.length}}
+	<input type="text" ng-model="font_object.size" />
+	<input type="text" ng-model="font_object.bg_size" />
+	<br/>
+	<div style="
+	position:relative;
+	border:8px rgba(0,0,0,0.1) solid;
+	width:{{w}}px;
+	height:{{h}}px;
+	">
+		<img 
+		style="
+		display:inline-block;
+		"
+		ng-src="{{img}}" />
+		</div>
+	</div>
+	
+</body>
+</html>
