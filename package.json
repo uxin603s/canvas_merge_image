@@ -1,0 +1,24 @@
+{
+  "name": "canvas_merge_image",
+  "version": "1.0.0",
+  "description": "待辦 \tdebug模式 \t整理等待font載入程式 \t拆function成檔案",
+  "main": "Canvas.js",
+  "dependencies": {
+    "canvas": "^1.6.4",
+    "xmlhttprequest": "^1.8.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uxin603s/canvas_merge_image.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/uxin603s/canvas_merge_image/issues"
+  },
+  "homepage": "https://github.com/uxin603s/canvas_merge_image#readme"
+}

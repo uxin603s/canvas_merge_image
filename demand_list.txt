@@ -1,0 +1,49 @@
+文字→圖
+	單行
+		垂直
+		水平
+		
+	多行
+		不切到英文單字 不切到名子
+		
+	自動填滿區域
+	畫線 (底線、刪除線)
+	文字描邊
+	全 英文單字
+	縮圖柔化
+	
+圖→圖
+	維持比例合成
+	不維持
+	
+使用函式
+	畫文字
+		c.fillText(text,x,y);
+			c.fillStyle=item.text_color;
+			c.font=item.text_size+"px '微軟正黑體'";
+			c.textBaseline="middle";
+		
+	描邊
+		c.strokeText(text,x,y);
+		c.lineWidth = item.FontBgSize;
+		c.strokeStyle = item.FontBgColor;
+	畫線
+		if(item.useLine){
+			if(item.useLine==1){
+				var line_y=.9;
+			}else{
+				var line_y=.5;
+			}
+			c.strokeStyle = item.text_color;
+			c.lineWidth = Math.floor(item.text_size/10);
+			
+			var y=h
+			
+			y*=line_y;
+			y-=c.lineWidth/2
+			c.moveTo(0,y);
+			c.lineTo(w,y);
+			c.stroke();
+		}			
+	drawImage 畫圖片
+	measureText 計算文字大小

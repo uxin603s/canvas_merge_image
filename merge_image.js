@@ -9,7 +9,7 @@ function merge_image(config,merge_image_arr,callback,message_callback,error_call
 			return this.data;
 		},
 	}
-	timeFlag.set("全部")
+	timeFlag.set("全部");
 	try{
 		var message=[];
 		var merge_image_arr=JSON.parse(JSON.stringify(merge_image_arr));

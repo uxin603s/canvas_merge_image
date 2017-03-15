@@ -1,6 +1,4 @@
 function merge_text(item){
-	
-	
 	function string_to_num(arr){
 		for(var i in arr){
 			if(typeof arr[i] =="object"){
